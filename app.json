@@ -1,0 +1,12 @@
+{
+  "name": "starks-todo-list",
+  "displayName": "starks-todo-list",
+  "expo": {
+    "name": "starks-todo-list",
+    "slug": "starks-todo-list",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ]
+  }
+}
