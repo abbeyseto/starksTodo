@@ -1,200 +1,153 @@
-import React from "react";
+import "react-native-gesture-handler";
+import React, { useState } from "react";
 import {
   StyleSheet,
   Text,
-  View,
-  ScrollView,
-  TouchableOpacity,
-  AsyncStorage,
+  Dimensions,
+  SafeAreaView,
+  Button,
+  Platform,
+  StatusBar,
+  FlatList,
+  Image,
+  Alert,
 } from "react-native";
+import { NavigationContainer } from "@react-navigation/native";
+import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import uuid from "uuid-random";
+// import {
+//   useDimensions,
+//   useDeviceOrientation,
+// } from "@react-native-community/hooks";
+import Header from "./app/screens/Header";
+import ListItem from "./app/screens/ListItem";
+import AddItem from "./app/screens/AddItem";
+import Schedule from "./app/screens/Schedule";
 
-import Configs from "./src/Configs";
-import Header from "./src/components/Header";
-import Footer from "./src/components/Footer";
+const Tab = createBottomTabNavigator();
 
-/**
- * App
- *
- * Root component for the application.
- * Handles logic for adding and removing notes.
- */
-export default class App extends React.Component {
-  /**
-   * constructor
-   *
-   * @array   notes   all added notes.
-   * @string  note    the current note value.
-   */
-  constructor(props) {
-    super(props);
-    this.state = {
-      notes: [],
-      note: "",
-    };
-  }
+const App = () => {
+  const [items, setItems] = useState([
+    {
+      id: uuid(),
+      type: "event",
+      title: "Milk contest",
+      description:
+        "I decided to do a Milk contest with the team today, the higher volume of milk consumed in 5 mins wins!",
+      date: "2021-02-12",
+      time: "9:00am",
+      attendees: ["adenleabbey@gmail.com", "abiodun@senergyeglobal.com"],
+    },
+    {
+      id: uuid(),
+      type: "todos",
+      status: "Done",
+      title: "Fry Eggs",
+      description: "I will be hungry when i get home, i need to fy eggs",
+      date: "2021-02-22",
+      time: "11:00am",
+      attendees: [],
+    },
+    {
+      id: uuid(),
+      type: "event",
+      title: "Swimming",
+      description:
+        "All work and no play.. heh. The team will be at the pool for some excercise",
+      date: "2021-03-08",
+      time: "2:00pm",
+      attendees: ["adenleabbey@gmail.com"],
+    },
+    {
+      id: uuid(),
+      type: "todos",
+      status: "In progress",
+      title: "Bread",
+      description: "Buy Bread",
+      date: "2021-03-12",
+      time: "8:00am",
+      attendees: [],
+    },
+    {
+      id: uuid(),
+      type: "event",
+      title: "Code review",
+      description: "All codes will be reviewed on 15th of March",
+      date: "2021-03-15",
+      time: "3:00pm",
+      attendees: ["adenleabbey@gmail.com", "abiodun@senergyeglobal.com"],
+    },
+    {
+      id: uuid(),
+      type: "todos",
+      status: "todo",
+      title: "Detox",
+      description: "Detox with Orange juice for healthy living",
+      date: "2021-2-12",
+      time: "9:00am",
+      attendees: [],
+    },
+  ]);
 
-  /**
-   * componentDidMount
-   *
-   * Load notes from asyncstorage if exists
-   */
-  async componentDidMount() {
-    const notes = await AsyncStorage.getItem("notes");
-    if (notes && notes.length > 0) {
-      this.setState({
-        notes: JSON.parse(notes),
+  const deleteItem = (id) => {
+    setItems((prevItems) => {
+      return prevItems.filter((item) => item.id != id);
+    });
+  };
+
+  const addItem = (input) => {
+    console.log(input);
+    if (!input) {
+      Alert.alert("Error", "Your input cannot be empty");
+    } else {
+      setItems((prevItems) => {
+        return [{ id: uuid(), ...input }, ...prevItems];
       });
     }
-  }
+  };
 
-  /**
-   * updateAsyncStorage
-   *
-   * @array   notes   notes array to save in asyncstorage
-   *
-   * @return  promise
-   */
-  updateAsyncStorage(notes) {
-    return new Promise(async (resolve, reject) => {
-      try {
-        await AsyncStorage.removeItem("notes");
-        await AsyncStorage.setItem("notes", JSON.stringify(notes));
-        return resolve(true);
-      } catch (e) {
-        return reject(e);
-      }
-    });
-  }
-
-  /**
-   * cloneNotes
-   *
-   * Creates a shallow copy of the state notes array
-   *
-   * @return   @array  cloned notes array
-   */
-  cloneNotes() {
-    return [...this.state.notes];
-  }
-
-  /**
-   * addNote
-   *
-   * Adds new note.
-   *
-   * @return  undefined
-   */
-  async addNote() {
-    if (this.state.note.length <= 0) return;
-
-    try {
-      const notes = this.cloneNotes();
-      notes.push(this.state.note);
-
-      await this.updateAsyncStorage(notes);
-
-      this.setState({
-        notes: notes,
-        note: "",
-      });
-    } catch (e) {
-      // notes could not be updated
-      alert(e);
-    }
-  }
-
-  /**
-   * removeNote
-   *
-   * Removes note based on array index.
-   *
-   * @return  undefined
-   */
-  async removeNote(i) {
-    try {
-      const notes = this.cloneNotes();
-      notes.splice(i, 1);
-
-      await this.updateAsyncStorage(notes);
-      this.setState({ notes: notes });
-    } catch (e) {
-      // Note could not be deleted
-      alert(e);
-    }
-  }
-
-  /**
-   * renderNotes
-   *
-   * Renders all notes in note array in a map.
-   *
-   * @return  Mapped notes array
-   */
-  renderNotes() {
-    return this.state.notes.map((note, i) => {
-      return (
-        <TouchableOpacity
-          key={i}
-          style={styles.note}
-          onPress={() => this.removeNote(i)}
-        >
-          <Text style={styles.noteText}>{note}</Text>
-        </TouchableOpacity>
-      );
-    });
-  }
-
-  render() {
+  const Todos = () => {
     return (
-      <View style={styles.container}>
-        <Header title={Configs.title} />
-        <ScrollView style={styles.scrollView}>
-          {this.state.notes.length === 0 ? (
-            <Text style={styles.noNotes}>
-              No Notes Available, Please tap on the button below to add notes
-            </Text>
-          ) : (
-            this.renderNotes()
+      <SafeAreaView style={styles.container}>
+        <Header title={"Stark's Kanban/Todo"} />
+        <FlatList
+          data={items}
+          renderItem={({ item }) => (
+            <ListItem
+              style={styles.description}
+              item={item}
+              deleteItem={deleteItem}
+            />
           )}
-        </ScrollView>
-        <Footer
-          onChangeText={(note) => this.setState({ note })}
-          inputValue={this.state.note}
-          onNoteAdd={() => this.addNote()}
         />
-      </View>
+        <AddItem addItem={addItem} />
+      </SafeAreaView>
     );
-  }
-}
+  };
+  return (
+    <NavigationContainer>
+      <Tab.Navigator>
+        <Tab.Screen name="Task" component={Todos} />
+        <Tab.Screen name="Events" component={Schedule} />
+      </Tab.Navigator>
+    </NavigationContainer>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    position: "relative",
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
   },
-  scrollView: {
-    maxHeight: "82%",
-    marginBottom: 100,
-    backgroundColor: "#fff",
+  description: {
+    color: "darkslateblue",
+    fontSize: 30,
   },
-  note: {
-    margin: 20,
-    padding: 20,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 2,
-    backgroundColor: "#f9f9f9",
-    borderColor: "#ddd",
-    borderRadius: 10,
+  img: {
+    width: 200,
+    height: 200,
+    borderRadius: 100,
   },
-  noteText: {
-    fontSize: 14,
-    padding: 20,
-  },
-  noNotes:{
-    fontSize: 20,
-    fontWeight:'600',
-    margin: 10,
-    padding: 50,
-  }
 });
+
+export default App;
