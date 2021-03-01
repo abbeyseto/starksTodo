@@ -12,11 +12,9 @@ const timeToString = (time) => {
 const today = new Date().toISOString().slice(0, 10);
 console.log(today);
 
-const selectedDay = "";
-
-const Schedule = () => {
+const Schedule = ({ route, navigation }) => {
   const [items, setItems] = useState({});
-
+  const selectedDay = route.params ? route.params.date : "";
   const loadItems = (day) => {
     setTimeout(() => {
       console.log("loading ... items...");

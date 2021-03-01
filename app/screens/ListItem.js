@@ -13,19 +13,47 @@ import {
   TouchableOpacity,
 } from "react-native";
 import { FontAwesome } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const ListItem = ({ item, deleteItem }) => {
+  const navigation = useNavigation();
   return (
-    <TouchableOpacity style={styles.listItem}>
+    <TouchableOpacity
+      style={styles.listItem}
+      onPress={() => {
+        navigation.navigate("TaskDetails", { item });
+      }}
+    >
       <View style={styles.listItemView} key={item.id}>
         <View style={styles.itemContainer}>
           <View style={styles.titleView}>
-            <Text style={styles.title}>{item.title}</Text>
+            <Text style={styles.title}>{item.summary}</Text>
             <Text style={styles.type}>{item.type}</Text>
           </View>
           <Text style={styles.listItemText}>{item.description}</Text>
+          {item.status && (
+            <Text
+              style={{
+                backgroundColor:
+                  item.status === "Todo"
+                    ? "#818583"
+                    : item.status === "Done"
+                    ? "#138058"
+                    : "#f5a742",
+                alignSelf: "flex-start",
+                color: "#fff",
+                padding: 3,
+                borderRadius: 3,
+              }}
+            >
+              {item.status}
+            </Text>
+          )}
           <Text style={styles.date}>{item.date}</Text>
-          <Text style={styles.attendees}>{item.attendees}</Text>
+          <Text style={styles.date}>{item.time}</Text>
+          {item.attendees.map((val, index) => {
+            return <Text key={index}>{val.email}</Text>;
+          })}
         </View>
         <FontAwesome
           name="remove"
@@ -60,7 +88,7 @@ const styles = StyleSheet.create({
   titleView: {
     flexDirection: "row",
     justifyContent: "space-between",
-    margin: 5,
+    margin: 0,
   },
   listItemText: {
     fontSize: 18,
