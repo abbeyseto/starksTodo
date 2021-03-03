@@ -46,7 +46,7 @@ const config = {
 };
 let dummyData = [
   {
-    id: uuid(),
+    _id: uuid(),
     type: "Event",
     summary: "Milk contest",
     location: "",
@@ -68,7 +68,7 @@ let dummyData = [
     ],
   },
   {
-    id: uuid(),
+    _id: uuid(),
     type: "Task",
     status: "Done",
     summary: "Fry Eggs",
@@ -87,7 +87,7 @@ let dummyData = [
     attendees: [],
   },
   {
-    id: uuid(),
+    _id: uuid(),
     type: "Event",
     summary: "Swimming",
     location: "",
@@ -106,7 +106,7 @@ let dummyData = [
     attendees: [{ email: "adenleabbey@gmail.com" }],
   },
   {
-    id: uuid(),
+    _id: uuid(),
     type: "Task",
     status: "In progress",
     summary: "Bread",
@@ -125,7 +125,7 @@ let dummyData = [
     attendees: [],
   },
   {
-    id: uuid(),
+    _id: uuid(),
     type: "Event",
     summary: "Code review",
     location: "",
@@ -146,7 +146,7 @@ let dummyData = [
     ],
   },
   {
-    id: uuid(),
+    _id: uuid(),
     type: "Task",
     status: "Todo",
     summary: "Detox",
@@ -169,6 +169,7 @@ const App = () => {
   const [items, setItems] = useState([]);
   const [cred, setCred] = useState(null);
   const [loading, setLoading] = useState(false);
+
   const deleteItem = (id) => {
     Alert.alert(
       "Confirm Delete",
@@ -182,9 +183,26 @@ const App = () => {
         {
           text: "Proceed",
           onPress: () => {
-            setItems((prevItems) => {
-              return prevItems.filter((item) => item.id != id);
-            });
+            let url = `http://localhost:5000/api/v1/events/${id}`;
+            let options = {
+              method: "DELETE",
+              headers: {
+                Accept: "application/json",
+                "Content-Type": "application/json",
+              },
+            };
+
+            fetch(url, options)
+              .then((responseJson) => responseJson.json())
+              .then((resp) => {
+                console.log("Item deleted", resp);
+                setItems((prevItems) => {
+                  return prevItems.filter((item) => item._id != id);
+                });
+              })
+              .catch((err) => {
+                console.log(err);
+              });
           },
         },
       ],
@@ -205,14 +223,14 @@ const App = () => {
   const getData = async () => {
     try {
       const jsonValue = await AsyncStorage.getItem("credstore");
-      return jsonValue != null ? JSON.parse(jsonValue) : null;
+      jsonValue != null ? setCred(JSON.parse(jsonValue)) : setCred(null);
     } catch (e) {
       // @TODO: error reading value
       console.log(e);
     }
-    setLoading(false);
   };
-  const getEvents = async () => {
+
+  const getEvents = () => {
     console.log("Get event called");
     let options = {
       method: "GET",
@@ -221,34 +239,32 @@ const App = () => {
         "Content-Type": "application/json",
       },
     };
+    let credentials = cred && cred.data._id;
+    console.log("From Get Events", credentials);
+    // if (cred) {
+    console.log("Fetching events....", credentials);
+    let url = `http://localhost:5000/api/v1/events/${credentials}/users`;
+    try {
+      fetch(url, options)
+        .then((responseJson) => responseJson.json())
+        .then((events) => {
+          let newItems = events.data;
+          console.log(
+            "All events for user from BACKEND fetched",
+            JSON.stringify(newItems)
+          );
 
-    let data = getData();
-    console.log("From Get Events", data);
-    if (data) {
-      console.log("Fetching events....");
-      let url = `http://localhost:5000/api/v1/events/${data.data._id}/users`;
-      try {
-        fetch(url, options)
-          .then((responseJson) => responseJson.json())
-          .then((events) => {
-            let newItems = events.data;
-            console.log(
-              "All events for user from BACKEND fetched",
-              JSON.stringify(newItems)
-            );
+          addItem(newItems);
+        });
 
-            addItem(newItems);
-          });
-
-        // return responseJson;
-      } catch (error) {
-        console.error(error);
-      }
+      // return responseJson;
+    } catch (error) {
+      console.error(error);
     }
+    // }
   };
   React.useEffect(() => {
-    let data = getData();
-    setCred(data);
+    getData();
     // setTimeout(() => {
     getEvents();
     // }, 1000);
@@ -342,12 +358,11 @@ const App = () => {
         let responseJson = await response.json();
         console.log("Response From BACKEND", JSON.stringify(responseJson));
         storeData(responseJson);
-        let data = getData();
-        setCred(data);
+        setCred(responseJson);
         setTimeout(() => {
-          console.log("From settime out", cred);
-          getEvents();
+          setLoading(!loading);
         }, 2000);
+
         // return responseJson;
       } catch (error) {
         console.error(error);
