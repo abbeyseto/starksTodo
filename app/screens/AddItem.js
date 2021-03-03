@@ -41,12 +41,14 @@ const validationSchema = yup.object().shape({
     .of(yup.string().email(({ value }) => `${value} is not a valid email`)),
 });
 
-const AddItem = ({ addItem }) => {
+const AddItem = ({ addItem, credId }) => {
+  let id = credId;
+  console.log("Fronm ADD ITEMS", id);
   const [modalVisible, setModalVisible] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [type, setType] = useState("");
+  const [type, setType] = useState("Task");
   const [rawDate, setRawDate] = useState("");
   const showDatePicker = () => {
     setDatePickerVisibility(true);
@@ -74,7 +76,7 @@ const AddItem = ({ addItem }) => {
     hideDatePicker();
   };
 
-  const finalSubmit = (values) => {
+  const finalSubmit = async (values) => {
     const payload = {
       summary: values.summary,
       // location: "3595 California St, San Francisco, CA 94118",
@@ -83,6 +85,7 @@ const AddItem = ({ addItem }) => {
       date: date,
       time: time,
       type: type,
+      _user: id,
       status: values.status,
       start: {
         dateTime: rawDate,
@@ -106,8 +109,25 @@ const AddItem = ({ addItem }) => {
     if (type != "event") {
       payload["attendees"] = [];
     }
-    console.log("after", payload);
-    addItem(payload);
+    let options = {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+    };
+    let url = `http://localhost:5000/api/v1/events/`;
+    console.log(payload);
+    try {
+      let response = await fetch(url, options);
+      let responseJson = await response.json();
+      console.log("Event added to BACKEND", JSON.stringify(responseJson));
+      addItem([payload]);
+      // return responseJson;
+    } catch (error) {
+      console.error(error);
+    }
   };
   return (
     <View>
@@ -130,7 +150,7 @@ const AddItem = ({ addItem }) => {
             </Pressable>
             <Text
               style={{
-                fontSize: 20,
+                fontSize: 25,
                 color: "darkslateblue",
                 fontWeight: "600",
                 margin: 10,
@@ -141,7 +161,7 @@ const AddItem = ({ addItem }) => {
             </Text>
             <Formik
               initialValues={{
-                type: "",
+                type: "Task",
                 status: "Todo",
                 summary: "",
                 description: "",
@@ -176,7 +196,7 @@ const AddItem = ({ addItem }) => {
                         setType(itemValue)
                       }
                     >
-                      <Picker.Item label="Todo" value="Task" />
+                      <Picker.Item label="Task" value="Task" />
                       <Picker.Item label="Event" value="Event" />
                     </Picker>
                   </View>
@@ -207,7 +227,7 @@ const AddItem = ({ addItem }) => {
                     </Text>
                   )}
 
-                  {type === "event" && (
+                  {type === "Event" && (
                     <View>
                       <TextInput
                         placeholder="Enter emails of guests seperated by coma"
@@ -276,14 +296,11 @@ const styles = StyleSheet.create({
   loginContainer: {
     width: 300,
     alignItems: "center",
-    // backgroundColor: "white",
     padding: 10,
-    // elevation: 1,
   },
   centeredView: {
     flex: 1,
     justifyContent: "center",
-    // alignItems: "center",
     marginTop: 22,
   },
   modalView: {
@@ -309,14 +326,14 @@ const styles = StyleSheet.create({
     // elevation: 1,
   },
   buttonOpen: {
-    backgroundColor: "darkslateblue",
+    backgroundColor: "#f4511e",
     position: "absolute",
     textAlign: "center",
     bottom: 20,
     right: 20,
   },
   buttonClose: {
-    backgroundColor: "crimson",
+    backgroundColor: "#f4511e",
     borderRadius: 20,
     position: "absolute",
     width: 40,
@@ -341,9 +358,10 @@ const styles = StyleSheet.create({
     width: 300,
     margin: 10,
     backgroundColor: "white",
-    borderColor: "darkslateblue",
-    borderWidth: 1,
+    borderColor: "lightgray",
+    borderWidth: 0.5,
     borderRadius: 5,
+    padding: 5,
   },
   submit: {
     borderRadius: 10,

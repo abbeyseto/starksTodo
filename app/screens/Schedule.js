@@ -64,6 +64,13 @@ const Schedule = ({ route, navigation }) => {
         loadItemsForMonth={loadItems}
         selected={selectedDay || today}
         renderItem={renderItem}
+        theme={{
+          selectedDayBackgroundColor: "#f4511e",
+          agendaDayTextColor: "#000",
+          agendaDayNumColor: "green",
+          agendaTodayColor: "#f4511e",
+          agendaKnobColor: "#f4511e",
+        }}
       />
     </View>
   );

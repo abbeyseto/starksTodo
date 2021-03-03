@@ -8,7 +8,9 @@ const Details = ({ route, navigation }) => {
       <Text>{route.params.item.summary}</Text>
       <Button
         title="See it in Calendar"
-        onPress={() => navigation.navigate("Events", { date: item.date })}
+        onPress={() =>
+          navigation.navigate("Events", { date: item.start.dateTime })
+        }
       />
     </View>
   );

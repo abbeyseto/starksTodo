@@ -1,0 +1,16 @@
+{
+  "sucess": true,
+  "msg": "Created a User",
+  "data": {
+    "event": [],
+    "_id": "603f2c24141d09270382812d",
+    "id": "114391540366302525580",
+    "name": "Abiodun Adenle",
+    "givenName": "Abiodun",
+    "familyName": "Adenle",
+    "photoUrl": "https://lh3.googleusercontent.com/a-/AOh14Ghhbe5R-TjmKrIA1XdoFxPCERXtlR0_s3ppBLDWmQ=s96-c",
+    "email": "adenleabbey@gmail.com",
+    "createdAt": "2021-03-03T06:26:44.284Z",
+    "__v": 0
+  }
+}

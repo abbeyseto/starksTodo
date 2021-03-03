@@ -1,22 +1,21 @@
 import React from "react";
-import {
-  StyleSheet,
-  Text,
-  Dimensions,
-  View,
-  Alert,
-  SafeAreaView,
-  Button,
-  Platform,
-  StatusBar,
-  Image,
-  TouchableOpacity,
-} from "react-native";
-import { FontAwesome } from "@expo/vector-icons";
+import { StyleSheet, Text, View, TouchableOpacity } from "react-native";
+import { FontAwesome, AntDesign } from "@expo/vector-icons";
 import { useNavigation } from "@react-navigation/native";
 
 const ListItem = ({ item, deleteItem }) => {
   const navigation = useNavigation();
+
+  let date =
+    item.start && item.start.dateTime
+      ? new Date(item.start.dateTime).toDateString()
+      : null;
+  let time =
+    item.start && item.start.dateTime
+      ? new Date(item.start.dateTime).toLocaleTimeString()
+      : null;
+
+  // console.log(date, time);
   return (
     <TouchableOpacity
       style={styles.listItem}
@@ -49,15 +48,16 @@ const ListItem = ({ item, deleteItem }) => {
               {item.status}
             </Text>
           )}
-          <Text style={styles.date}>{item.date}</Text>
-          <Text style={styles.date}>{item.time}</Text>
-          {item.attendees.map((val, index) => {
-            return <Text key={index}>{val.email}</Text>;
-          })}
+          <Text style={styles.date}>{date}</Text>
+          <Text style={styles.date}>{time}</Text>
+          {item.attendees &&
+            item.attendees.map((val, index) => {
+              return <Text key={index}>{val.email}</Text>;
+            })}
         </View>
-        <FontAwesome
-          name="remove"
-          size={20}
+        <AntDesign
+          name="delete"
+          size={24}
           color="firebrick"
           onPress={() => deleteItem(item.id)}
         />
@@ -73,6 +73,14 @@ const styles = StyleSheet.create({
     backgroundColor: "#f8f8f8",
     borderBottomWidth: 1,
     borderColor: "#eee",
+    shadowColor: "#000",
+    shadowOffset: {
+      width: 0,
+      height: 2,
+    },
+    elevation: 2,
+    shadowOpacity: 0.5,
+    margin: 5,
   },
   itemContainer: {
     flexDirection: "column",
@@ -96,7 +104,7 @@ const styles = StyleSheet.create({
   title: {
     flex: 4,
     fontSize: 25,
-    color: "darkslateblue",
+    color: "#366ca1",
   },
   type: {
     flex: 1,
