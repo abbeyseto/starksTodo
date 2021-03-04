@@ -20,6 +20,7 @@ import { Formik, Form, FieldArray } from "formik";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import * as yup from "yup";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import moment from "moment";
 import * as Localization from "expo-localization";
 import i18n from "i18n-js";
@@ -43,13 +44,30 @@ const validationSchema = yup.object().shape({
 
 const AddItem = ({ addItem, credId }) => {
   let id = credId;
-  console.log("Fronm ADD ITEMS", id);
+
+  // console.log("Fronm ADD ITEMS", id);
   const [modalVisible, setModalVisible] = useState(false);
   const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [type, setType] = useState("Task");
   const [rawDate, setRawDate] = useState("");
+  const [auth, setAuth] = useState(null);
+
+  const getData = async (name) => {
+    try {
+      const jsonValue = await AsyncStorage.getItem(name);
+      return jsonValue != null ? setAuth(JSON.parse(jsonValue)) : setAuth(null);
+    } catch (e) {
+      // @TODO: error reading value
+      console.log(e);
+    }
+  };
+
+  React.useEffect(() => {
+    getData("authCred");
+  }, []);
+
   const showDatePicker = () => {
     setDatePickerVisibility(true);
   };
@@ -75,9 +93,10 @@ const AddItem = ({ addItem, credId }) => {
     console.log(Localization.timezone);
     hideDatePicker();
   };
-
+  // console.log(auth);
   const finalSubmit = async (values) => {
     const payload = {
+      auth,
       summary: values.summary,
       // location: "3595 California St, San Francisco, CA 94118",
       description: values.description,
@@ -106,7 +125,7 @@ const AddItem = ({ addItem, credId }) => {
         ],
       },
     };
-    if (type != "event") {
+    if (type != "Event") {
       payload["attendees"] = [];
     }
     let options = {
@@ -117,13 +136,12 @@ const AddItem = ({ addItem, credId }) => {
       },
       body: JSON.stringify(payload),
     };
-    let url = `http://localhost:5000/api/v1/events/`;
-    console.log(payload);
+    let url = `https://mysterious-journey-83983.herokuapp.com/api/v1/events/`;
     try {
       let response = await fetch(url, options);
       let responseJson = await response.json();
-      console.log("Event added to BACKEND", JSON.stringify(responseJson));
-      addItem([payload]);
+      console.log("Event added to BACKEND", responseJson.data);
+      addItem([responseJson.data]);
       // return responseJson;
     } catch (error) {
       console.error(error);

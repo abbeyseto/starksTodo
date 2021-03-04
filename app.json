@@ -2,11 +2,13 @@
   "name": "starks-todo-list",
   "displayName": "starks-todo-list",
   "expo": {
-    "name": "starks-todo-list",
-    "slug": "starks-todo-list",
+    "name": "Todo/kanban",
+    "slug": "todokanban",
     "version": "1.0.0",
     "assetBundlePatterns": [
       "**/*"
-    ]
+    ],
+    "description": "A Kanban todo mobile app that let you schedule Calendar events. Built with React native(FrontEnd), NodeJS and Express (Backend), Google Calendar API and with a MongoDB data store.",
+    "githubUrl": "https://github.com/abbeyseto/starksTodo,  https://github.com/abbeyseto/starksTodo-BackendAPI"
   }
 }

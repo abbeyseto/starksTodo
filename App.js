@@ -183,7 +183,7 @@ const App = () => {
         {
           text: "Proceed",
           onPress: () => {
-            let url = `http://localhost:5000/api/v1/events/${id}`;
+            let url = `https://mysterious-journey-83983.herokuapp.com/api/v1/events/${id}`;
             let options = {
               method: "DELETE",
               headers: {
@@ -210,19 +210,19 @@ const App = () => {
     );
   };
 
-  const storeData = async (value) => {
+  const storeData = async (name, value) => {
     try {
       const jsonValue = JSON.stringify(value);
-      await AsyncStorage.setItem("credstore", jsonValue);
+      await AsyncStorage.setItem(name, jsonValue);
     } catch (e) {
       // @TODO: saving error
       console.log(e);
     }
   };
 
-  const getData = async () => {
+  const getData = async (name) => {
     try {
-      const jsonValue = await AsyncStorage.getItem("credstore");
+      const jsonValue = await AsyncStorage.getItem(name);
       jsonValue != null ? setCred(JSON.parse(jsonValue)) : setCred(null);
     } catch (e) {
       // @TODO: error reading value
@@ -243,7 +243,7 @@ const App = () => {
     console.log("From Get Events", credentials);
     // if (cred) {
     console.log("Fetching events....", credentials);
-    let url = `http://localhost:5000/api/v1/events/${credentials}/users`;
+    let url = `https://mysterious-journey-83983.herokuapp.com/api/v1/events/${credentials}/users`;
     try {
       fetch(url, options)
         .then((responseJson) => responseJson.json())
@@ -264,7 +264,7 @@ const App = () => {
     // }
   };
   React.useEffect(() => {
-    getData();
+    getData("credstore");
     // setTimeout(() => {
     getEvents();
     // }, 1000);
@@ -312,7 +312,7 @@ const App = () => {
           <Button
             color="#f4511e"
             title="Go to Events"
-            onPress={() => navigation.navigate("Events")}
+            onPress={() => navigation.navigate("Events", { itemValues: items })}
           />
           <View />
           <Button color="#f4511e" title="Log Out" onPress={clear} />
@@ -351,13 +351,18 @@ const App = () => {
         },
         body: JSON.stringify(user),
       };
-      let url = `http://localhost:5000/api/v1/users`;
+      let url = `https://mysterious-journey-83983.herokuapp.com/api/v1/users`;
       // console.log(url);
       try {
         let response = await fetch(url, options);
         let responseJson = await response.json();
         console.log("Response From BACKEND", JSON.stringify(responseJson));
-        storeData(responseJson);
+        storeData("credstore", responseJson);
+        let backEndCred = {
+          clientId,
+          refreshToken,
+        };
+        storeData("authCred", backEndCred);
         setCred(responseJson);
         setTimeout(() => {
           setLoading(!loading);
